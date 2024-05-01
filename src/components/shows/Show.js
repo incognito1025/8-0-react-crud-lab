@@ -1,17 +1,47 @@
-import { useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
 import "./Show.css";
 
 import ErrorMessage from "../errors/ErrorMessage";
+// src/components/shows/Show.js
+import { destroyShow, getOneShow } from "../../api/fetch";
+
+import { useEffect, useState } from "react";
+
+
 
 function Show() {
+  let navigate = useNavigate();
   const [show, setShow] = useState({});
   const [loadingError, setLoadingError] = useState(false);
 
-  const { id } = useParams();
+  const { id } = useParams();  // The useParam hook called useParams with id. Type in the url. after the `/`, wild card.  The id (wildcard) is the property in the object and will access the value of the id.
 
-  function handleDelete() {}
+  function handleDelete() {
+    destroyShow(id)
+      .then(() => navigate("/shows"))
+      .catch((error) => {
+        console.error(error);
+        setLoadingError(true);
+      });
+  }
+
+  useEffect(() => {
+    getOneShow(id)
+      .then((response) => {
+        setShow(response);
+        if (Object.keys(response).length === 0) {
+          setLoadingError(true);
+        } else {
+          setLoadingError(false);
+        }
+      })
+      .catch((error) => {
+        setLoadingError(true);
+      });
+  }, [id]);  //dependency array
+
+
 
   return (
     <section className="shows-show-wrapper">
@@ -57,3 +87,5 @@ function Show() {
 }
 
 export default Show;
+
+// CRUD - create read update delete
